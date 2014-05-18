@@ -31,6 +31,23 @@ For instance lets say you need the `bc` command but aren't sure if this is insta
 
 This varies based on your platform and how ansible was installed. The main directory where modules are located in the source distribution from github is [./library](https://github.com/ansible/ansible/tree/devel/library). For me this is installed to `/usr/share/ansible`.
 
+From setup.py:
+
+```
+ 16 # find library modules
+ 17 from ansible.constants import DEFAULT_MODULE_PATH
+ 18 module_paths = DEFAULT_MODULE_PATH.split(os.pathsep)
+ 19 # always install in /usr/share/ansible if specified
+ 20 # otherwise use the first module path listed
+ 21 if '/usr/share/ansible' in module_paths:
+ 22     install_path = '/usr/share/ansible'
+ 23 else:
+ 24     install_path = module_paths[0]
+ 25 dirs=os.listdir("./library/")
+ 26 data_files = []
+ 27 for i in dirs:
+ 28     data_files.append((os.path.join(install_path, i), glob('./library/' + i + '/*')))
+```
 
 ####*Module Input*
 
