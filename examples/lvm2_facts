@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+# lvm2_facts - used to return lvm2 output as json
+#              for ansible 
+#
+# author: Rick Briganti <jeviolle@newaliases.org>
+# github: jeviolle
+#
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+export PATH
+
+echo -n "{ \"ansible_facts\": {"
+echo -n " \"physical_volumes\": ["
+pvs --separator ':' --noheadings --units k | awk -F ':' '{
+printf " {"
+gsub(/ */,"",$1)
+printf " \"pv_name\":" "\"" $1 "\"" ","
+printf " \"vg_name\":" "\"" $2 "\"" ","
+printf " \"pv_size\":" "\"" $5 "\"" ","
+printf " \"pv_free\":" "\"" $6 "\""
+printf " },"
+}' | sed '$s/,$//'
+echo -n " ],"
+
+echo -n " \"volume_groups\": [" 
+vgdisplay -c | awk -F ':' '{ 
+printf " {"
+gsub(/ */,"",$1)
+printf " \"vg_name\":" "\"" $1 "\"" ","
+printf " \"vg_access\":" "\"" $2 "\"" ","
+printf " \"max_lv\":" "\"" $5 "\"" ","
+printf " \"cur_lv\":" "\"" $6 "\"" ","
+printf " \"open_lv\":" "\"" $7 "\"" ","
+printf " \"max_pv\":" "\"" $9 "\"" ","
+printf " \"cur_pv\":" "\"" $10 "\"" ","
+printf " \"open_pv\":" "\"" $11 "\"" ","
+printf " \"vg_size\":" "\"" $12 "\"" ","
+printf " \"pe_size\":" "\"" $13 "\"" ","
+printf " \"total_pe\":" "\"" $14 "\"" ","
+printf " \"alloc_pe\":" "\"" $15 "\"" ","
+printf " \"free_pe\":" "\"" $16 "\"" ","
+printf " \"vg_uuid\":" "\"" $17 "\"" 
+printf " },"
+}' | sed '$s/,$//'
+echo -n " ],"
+
+echo -n " \"logical_volumes\": ["
+lvs --separator ':' --noheadings --units k | awk -F ':' '{
+printf " {"
+gsub(/ */,"",$1)
+printf " \"lv_name\":" "\"" $1 "\"" ","
+printf " \"vg_name\":" "\"" $2 "\"" ","
+printf " \"attrs\":" "\"" $3 "\"" ","
+printf " \"lv_size\":" "\"" $4 "\"" 
+printf " },"
+}' | sed '$s/,$//'
+echo -n " ]"
+echo -n " }}"
